@@ -27,35 +27,7 @@ export default ({user}) => {
     const [emojiOpen, setEmojiOpen] = useState(false);
     const [text, setText] = useState('');
     const [listening, setListening] = useState(false);
-    const [list, setList] = useState([
-        {author: 123, body: 'bla bla bla'},
-        {author: 123, body: ' bla bla'},
-        {author: 1234, body: 'bla bla bla bla'},
-        {author: 123, body: 'bla bla bla'},
-        {author: 123, body: ' bla bla'},
-        {author: 1234, body: 'bla bla bla bla'},
-        {author: 123, body: 'bla bla bla'},
-        {author: 123, body: ' bla bla'},
-        {author: 1234, body: 'bla bla bla bla'},
-        {author: 123, body: 'bla bla bla'},
-        {author: 123, body: ' bla bla'},
-        {author: 1234, body: 'bla bla bla bla'},
-        {author: 123, body: 'bla bla bla'},
-        {author: 123, body: ' bla bla'},
-        {author: 1234, body: 'bla bla bla bla'},
-        {author: 123, body: 'bla bla bla'},
-        {author: 123, body: ' bla bla'},
-        {author: 1234, body: 'bla bla bla bla'},
-        {author: 123, body: 'bla bla bla'},
-        {author: 123, body: ' bla bla'},
-        {author: 1234, body: 'bla bla bla bla'},
-        {author: 123, body: 'bla bla bla'},
-        {author: 123, body: ' bla bla'},
-        {author: 1234, body: 'bla bla bla bla'},
-        {author: 123, body: 'bla bla bla'},
-        {author: 123, body: ' bla bla'},
-        {author: 1234, body: 'bla bla bla bla'},
-    ]);
+    const [list, setList] = useState([]);
 
     useEffect(()=>{
         if(body.current.scrollHeight > body.current.offsetHeight) {
@@ -77,7 +49,13 @@ export default ({user}) => {
     }  
 
     const handleSendClick = () => {
-
+        if (text.trim() !== "") {
+            setList([...list, {
+                author: user.id, // use user.id
+                body: text
+            }]);
+            setText('');
+        }
     }
     const handleMicClick = () => {
         if (recognition !== null) {
@@ -126,7 +104,7 @@ export default ({user}) => {
                     <MessageItem 
                         key={key}
                         data={item}
-                        user={user}
+                        user={user.id} // user é um objeto, não o id
                     />
                 ))}
             </div>

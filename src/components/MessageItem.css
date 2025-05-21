@@ -24,3 +24,7 @@
     height: 15px;
     margin-top: -15px;
 }
+.messageItem.right {
+  justify-content: flex-end;
+  text-align: right;
+}
