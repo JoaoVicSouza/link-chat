@@ -3,6 +3,7 @@ import EmojiPicker from 'emoji-picker-react';
 import './ChatWindow.css';
 
 import MessageItem from './MessageItem';
+import Api from '../Api';
 
 import SearchIcon from '@mui/icons-material/Search';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
@@ -13,7 +14,7 @@ import SendIcon from '@mui/icons-material/Send';
 import MicIcon from '@mui/icons-material/Mic';
 
 
-export default ({user}) => {
+export default ({user, data}) => {
 
     const body = useRef();
 
@@ -28,6 +29,14 @@ export default ({user}) => {
     const [text, setText] = useState('');
     const [listening, setListening] = useState(false);
     const [list, setList] = useState([]);
+    const [users, setUsers] = useState([]);
+
+    useEffect(()=>{
+
+        setList([]);
+        let unsub = Api.onChatContent(data.chatId, setList, setUsers);
+        return unsub;
+    }, [data.chatId]);
 
     useEffect(()=>{
         if(body.current.scrollHeight > body.current.offsetHeight) {
@@ -48,13 +57,17 @@ export default ({user}) => {
         setEmojiOpen(false);
     }  
 
+    const handleInputUp = (e) => {
+        if (e.keyCode === 13) {
+            handleSendClick();
+        }
+    }
+
     const handleSendClick = () => {
         if (text.trim() !== "") {
-            setList([...list, {
-                author: user.id, // use user.id
-                body: text
-            }]);
+            Api.sendMessage(data, user.id, 'text', text, users);
             setText('');
+            setEmojiOpen(false);
         }
     }
     const handleMicClick = () => {
@@ -79,8 +92,8 @@ export default ({user}) => {
             <div className="chatWindow--header">
               
                 <div className="chatWindow--headerinfo">
-                    <img className="chatWindow--avatar" src="https://cdn.los-animales.org/fotos/419458454_7009928_thumb.jpg" alt="" />
-                    <div className="chatWindow--name">Nalu</div>
+                    <img className="chatWindow--avatar" src={data.image} alt="" />
+                    <div className="chatWindow--name">{data.title}</div>
                 </div>
 
                 <div className="chatWindow--headerbuttons"> 
@@ -142,6 +155,7 @@ export default ({user}) => {
                     placeholder="Digite uma mensagem" 
                     value={text}
                     onChange={e => setText(e.target.value)}
+                    onKeyUp={handleInputUp}
                 />
                 </div>
 

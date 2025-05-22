@@ -97,7 +97,10 @@ export default function App() {
       </div>
       <div className="contentarea">
         {activeChat.chatId !== undefined ? (
-          <ChatWindow user={user} />
+          <ChatWindow 
+            user={user} 
+            data={activeChat}
+          />
         ) : (
           <ChatIntro />
         )}
@@ -105,3 +108,4 @@ export default function App() {
     </div>
   );
 }
+

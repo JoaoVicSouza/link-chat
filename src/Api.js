@@ -1,8 +1,9 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, doc, setDoc, collection, getDocs, query, where, addDoc, updateDoc, arrayUnion, onSnapshot } from 'firebase/firestore';
+import { getFirestore, doc, setDoc, collection, getDocs, query, where, addDoc, updateDoc, arrayUnion, onSnapshot, getDoc } from 'firebase/firestore';
 
 import firebaseConfig from './firebaseConfig';
 import firebase from 'firebase/compat/app';
+import { use } from 'react';
 
 const firebaseApp = initializeApp(firebaseConfig);
 const db = getFirestore(firebaseApp);
@@ -74,9 +75,68 @@ export default {
             if (docSnap.exists()) {
                 let data = docSnap.data();
                 if (data.chats) {
-                    setChatList(data.chats);
+                    let chats = [...data.chats];
+
+                    chats.sort((a, b)=>{
+                        if(a.lastMessageDate === undefined){
+                            return -1;
+                        } 
+                        if(b.lastMessageDate === undefined){
+                            return -1;
+                        }
+                        if(a.lastMessageDate.seconds < b.lastMessageDate.seconds){
+                            return 1;
+                        } 
+                        else{
+                            return -1;
+                        }
+                    });
+
+                    setChatList(chats);
                 }
             }
         });
+    },
+    onChatContent: (chatId, setList, setUsers) => {
+        return onSnapshot(doc(db, 'chats', chatId), (doc) => {
+            if(doc.exists) {
+                let data = doc.data();
+                setList(data.messages);
+                setUsers(data.users);
+            }
+        });
+    },
+    sendMessage: async(chatData, userId, type, body, users) => {
+            let now = new Date();
+
+            await updateDoc(doc(db, 'chats', chatData.chatId), {
+                messages: arrayUnion({
+                    type,
+                    author: userId,
+                    body,
+                    date: now
+                })
+
+            });
+
+            for(let i in users) {
+                let u = await getDoc(doc(db, 'users', users[i]));
+                let data = u.data();
+                if(data.chats) {
+                    let chats = [...data.chats];
+
+                    for(let e in chats){
+                        if(chats[e].chatId === chatData.chatId) {
+                            chats[e].lastMessage = body;
+                            chats[e].lastMessageDate = now;
+                        }
+                    }
+
+                    await updateDoc(doc(db, 'users', users[i]), {
+                        chats
+                    });
+                }                
+            }
+
     }
-};
+}
