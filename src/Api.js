@@ -1,35 +1,82 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, doc, setDoc } from 'firebase/firestore';
+import { getFirestore, doc, setDoc, collection, getDocs, query, where, addDoc, updateDoc, arrayUnion, onSnapshot } from 'firebase/firestore';
 
 import firebaseConfig from './firebaseConfig';
+import firebase from 'firebase/compat/app';
 
 const firebaseApp = initializeApp(firebaseConfig);
 const db = getFirestore(firebaseApp);
 
 export default {
     addUser: async (user) => {
+        const defaultAvatar = 'https://sm.ign.com/t/ign_pk/cover/a/avatar-gen/avatar-generations_rpge.600.jpg';
+        const q = query(collection(db, 'users'), where('name', '==', user.name));
+        const querySnapshot = await getDocs(q);
+
+         if (querySnapshot.empty) {
         await setDoc(doc(db, 'users', String(user.id)), {
+            id: String(user.id),
             name: user.name,
-            avatar: user.avatar,
+            avatar: user.avatar || defaultAvatar,
             password: user.password
         }, { merge: true });
+        }
+        console.log( user.id);
     },
     getContactList: async (userId) => {
         let list = [];
-
-        let results = await db.collection('users').get();
+        
+        const results = await getDocs(collection(db, 'users'));
         results.forEach(result => {
             let data = result.data();
 
-            if(result.id !== userId){
+            if(result.id !== String(userId)){
                 list.push({
                     id: result.id,
                     name: data.name,
-                    avatar: data.avatar
+                    avatar: data.avatar,
                 });
             }
         });
-
+        
         return list;
+    },
+    addNewChat: async (user, user2) => {
+        let newChatRef = await addDoc(collection(db, 'chats'), {
+            messages: [],
+            users: [user.id, user2.id]
+        });
+
+        await updateDoc(doc(db, 'users', user.id), {
+            chats: arrayUnion({
+                chatId: newChatRef.id,
+                title: user2.name,
+                image: user2.avatar,
+                with: user2.id
+            })
+        });
+
+        await updateDoc(doc(db, 'users', user2.id), {
+            chats: arrayUnion({
+                chatId: newChatRef.id,
+                title: user.name,
+                image: user.avatar,
+                with: user.id
+            })
+        });
+    },
+    onChatList:(userId, setChatList) => {
+        // Cria uma referência ao documento do usuário
+        const userDocRef = doc(db, 'users', userId);
+
+        // Usa onSnapshot do Modular SDK
+        return onSnapshot(userDocRef, (docSnap) => {
+            if (docSnap.exists()) {
+                let data = docSnap.data();
+                if (data.chats) {
+                    setChatList(data.chats);
+                }
+            }
+        });
     }
 };

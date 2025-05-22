@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './App.css';
 
 import Api from './Api';
@@ -24,21 +24,21 @@ export default function App() {
   const [activeChat, setActiveChat] = useState({});
   const [showNewChat, setShowNewChat] = useState(false);
 
+  useEffect(() => {
+    if(user !== null){
+      let unsub = Api.onChatList(user.id, setChatList);
+      return unsub;
+    }
+  }, [user]);
+
   // URL padrão de avatar
   const defaultAvatar = 'https://sm.ign.com/t/ign_pk/cover/a/avatar-gen/avatar-generations_rpge.600.jpg';
 
   // Ao submeter o Login
-  const handleLogin = async (name, password) => {
-    let newUser = {
-      id: Date.now(),
-      name: name,
-      avatar: defaultAvatar,
-      password: password
-    }
-
-    setUserName(name);
-    setUser(newUser);
-    await Api.addUser(newUser);
+  const handleLogin = async (user) => {
+    setUserName(user.name);
+    setUser(user);
+    await Api.addUser(user);
   };
 
   // Se não estiver logado, mostra Login

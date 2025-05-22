@@ -15,6 +15,8 @@ function generateGuid() {
 const firebaseApp = initializeApp(firebaseConfig);
 const db = getFirestore(firebaseApp);
 
+const defaultAvatar = 'https://sm.ign.com/t/ign_pk/cover/a/avatar-gen/avatar-generations_rpge.600.jpg';
+
 export default function Login({ onLogin }) {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
@@ -29,22 +31,37 @@ export default function Login({ onLogin }) {
       const querySnapshot = await getDocs(q);
 
       if (!querySnapshot.empty) {
-        // Usuário já existe, verificar senha
+        // Usuário já existe
         const userDoc = querySnapshot.docs[0].data();
         if (userDoc.password === password) {
-          localStorage.setItem("user", JSON.stringify({ id: querySnapshot.docs[0].id, name }));
+          localStorage.setItem("user", JSON.stringify({ id: userDoc.id, name: userDoc.name, avatar: userDoc.avatar }));
           setError("");
-          onLogin(name, password);
+          onLogin({
+            id: userDoc.id,
+            name: userDoc.name,
+            avatar: userDoc.avatar,
+            password: userDoc.password
+          });
         } else {
           setError("Senha incorreta.");
         }
       } else {
-        // Novo usuário, cadastrar
+        // Novo usuário
         const id = generateGuid();
-        await setDoc(doc(db, 'users', id), { name, password });
-        localStorage.setItem("user", JSON.stringify({ id, name }));
+        await setDoc(doc(db, 'users', id), { 
+          id, 
+          name, 
+          password, 
+          avatar: defaultAvatar 
+        });
+        localStorage.setItem("user", JSON.stringify({ id, name, avatar: defaultAvatar }));
         setError("");
-        onLogin(name, password);
+        onLogin({
+          id,
+          name,
+          avatar: defaultAvatar,
+          password
+        });
       }
     } else {
       setError("Preencha nome e senha.");
