@@ -2,15 +2,15 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  background: linear-gradient(90deg, #f0f7f4 0%, #f6f8f8 100%);
 }
-
 .chatWindow--header {
   height: 60px;
-  border-bottom: 1px solid #ccc;
+  border-bottom: 1px solid #ffffff;
   display: flex;
   justify-content: space-between;
   align-items: center;
- 
+  background-color: white;
 }
 
 .chatWindow--headerinfo{
@@ -33,12 +33,6 @@
     color: #000;
 }
 
-.chatWindow--headerbuttons {
-    display: flex;
-    align-items: center;
-    margin-right: 15px;
-}
-
 .chatWindow--btn{
     width: 40px;
     height: 40px;
@@ -54,10 +48,9 @@
 .chatWindow--body {
     flex: 1;
     overflow-y: auto;
-    background-color: #E5DDD5;
+    background-color: transparent;
     background-size: cover;
     background-position: center;
-    background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
     padding: 20px 30px;
 }
 
@@ -74,8 +67,17 @@
     height: 62px;
     display: flex;
     align-items: center;
+    justify-content: center;
 }
-
+.sendBar{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #e9eef2;
+    padding: 10px;
+    border-radius: 15px;
+    width: 80%;
+}
 .chatWindow--pre {
     display: flex;
     margin: 0 15px;

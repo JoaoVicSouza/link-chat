@@ -27,7 +27,7 @@ export default ({data, user}) => {
         >
             <div 
             className="messageItem"
-                style={{backgroundColor: user === data.author ? '#dcf8c6' : '#fff'}}
+                style={{backgroundColor: user === data.author ? '#fff' : '#e9eef2'}}
             >
                 <div className="messageText">{data.body}</div>
                 <div className="messageDate">{time}</div>

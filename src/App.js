@@ -62,21 +62,15 @@ export default function App() {
             alt={userName}
           />
           <div className="header--buttons">
-            <div className="header--btn">
-              <DonutLargeIcon style={{ color: '#919191' }} />
-            </div>
             <div onClick={() => setShowNewChat(true)} className="header--btn">
-              <ChatIcon style={{ color: '#919191' }} />
-            </div>
-            <div className="header--btn">
-              <MoreVertIcon style={{ color: '#919191' }} />
+              <ChatIcon style={{ color: '#00BFA5' }} />
             </div>
           </div>
         </header>
 
         <div className="search">
           <div className="search--input">
-            <SearchIcon fontSize="small" style={{ color: '#919191' }} />
+            <SearchIcon fontSize="small" style={{ color: '#c0c0c0' }} />
             <input
               type="search"
               placeholder="Procurar ou começar uma nova conversa"

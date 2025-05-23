@@ -69,7 +69,6 @@ export default {
     onChatList:(userId, setChatList) => {
         // Cria uma referência ao documento do usuário
         const userDocRef = doc(db, 'users', userId);
-
         // Usa onSnapshot do Modular SDK
         return onSnapshot(userDocRef, (docSnap) => {
             if (docSnap.exists()) {
@@ -97,46 +96,60 @@ export default {
             }
         });
     },
-    onChatContent: (chatId, setList, setUsers) => {
-        return onSnapshot(doc(db, 'chats', chatId), (doc) => {
-            if(doc.exists) {
-                let data = doc.data();
-                setList(data.messages);
-                setUsers(data.users);
-            }
-        });
-    },
-    sendMessage: async(chatData, userId, type, body, users) => {
-            let now = new Date();
+    onChatContent: (() => {
+        let lastMessagesLength = 0;
+        return (chatId, setList, setUsers, loggedUserId) => {
+            return onSnapshot(doc(db, 'chats', chatId), (doc) => {
+                if(doc.exists) {
+                    let data = doc.data();
+                    setList(data.messages);
+                    setUsers(data.users);
 
-            await updateDoc(doc(db, 'chats', chatData.chatId), {
-                messages: arrayUnion({
-                    type,
-                    author: userId,
-                    body,
-                    date: now
-                })
-
-            });
-
-            for(let i in users) {
-                let u = await getDoc(doc(db, 'users', users[i]));
-                let data = u.data();
-                if(data.chats) {
-                    let chats = [...data.chats];
-
-                    for(let e in chats){
-                        if(chats[e].chatId === chatData.chatId) {
-                            chats[e].lastMessage = body;
-                            chats[e].lastMessageDate = now;
-                        }
+                    // Só toca o som se a nova mensagem NÃO for do usuário logado
+                    if (
+                        data.messages &&
+                        data.messages.length > lastMessagesLength &&
+                        data.messages[data.messages.length - 1].author !== loggedUserId
+                    ) {
+                        const audio = new Audio('/notification.mp3');
+                        audio.play();
                     }
+                    lastMessagesLength = data.messages ? data.messages.length : 0;
+                }
+            });
+        }
+    })(),
+    sendMessage: async(chatData, userId, type, body, users) => {
+        let now = new Date();
 
-                    await updateDoc(doc(db, 'users', users[i]), {
-                        chats
-                    });
-                }                
-            }
+        await updateDoc(doc(db, 'chats', chatData.chatId), {
+            messages: arrayUnion({
+                type,
+                author: userId,
+                body,
+                date: now
+            })
+        });
 
+        // Removido o som daqui
+
+        for(let i in users) {
+            let u = await getDoc(doc(db, 'users', users[i]));
+            let data = u.data();
+            if(data.chats) {
+                let chats = [...data.chats];
+
+                for(let e in chats){
+                    if(chats[e].chatId === chatData.chatId) {
+                        chats[e].lastMessage = body;
+                        chats[e].lastMessageDate = now;
+                    }
+                }
+
+                await updateDoc(doc(db, 'users', users[i]), {
+                    chats
+                });
+            }                
+        }
     }
 }
