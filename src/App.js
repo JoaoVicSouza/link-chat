@@ -9,9 +9,7 @@ import ChatWindow from './components/ChatWindow';
 import NewChat from './components/NewChat';
 import Login from './Login';
 
-import DonutLargeIcon from '@mui/icons-material/DonutLarge';
 import ChatIcon from '@mui/icons-material/Chat';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
 import SearchIcon from '@mui/icons-material/Search';
 
 export default function App() {
@@ -23,6 +21,7 @@ export default function App() {
   const [chatList, setChatList] = useState([]);
   const [activeChat, setActiveChat] = useState({});
   const [showNewChat, setShowNewChat] = useState(false);
+  const [searchText, setSearchTextChat] = useState('');
 
   useEffect(() => {
     if(user !== null){
@@ -74,12 +73,17 @@ export default function App() {
             <input
               type="search"
               placeholder="Procurar ou começar uma nova conversa"
+              value={searchText}
+              onChange={(e) => setSearchTextChat(e.target.value)} 
             />
           </div>
         </div>
 
         <div className="chatlist">
-          {chatList.map((item) => (
+            {chatList.filter((item => 
+              item.title.toLowerCase().includes(searchText.toLowerCase())
+            )  
+            ).map(item => (
             <ChatListItem
               key={item.chatId}
               data={item}

@@ -19,8 +19,16 @@ export default ({user, chatlist, show, setShow}) => {
     }, [user]);
     
     const addNewChat = async (user2) => {
+        // Verifica se já existe chat com esse usuário
+        const alreadyExists = chatlist.some(
+            chat => chat.with === user2.id
+        );
+        if (alreadyExists) {
+            alert('Você já tem uma conversa com esse usuário.');
+            handleClose();
+            return;
+        }
         await Api.addNewChat(user, user2);
-
         handleClose();
     }
 

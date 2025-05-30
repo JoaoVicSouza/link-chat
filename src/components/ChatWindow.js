@@ -9,7 +9,7 @@ import InsertEmoticonIcon from '@mui/icons-material/InsertEmoticon';
 import CloseIcon from '@mui/icons-material/Close';
 import SendIcon from '@mui/icons-material/Send';
 import MicIcon from '@mui/icons-material/Mic';
-
+import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 
 export default ({ user, data }) => {
 
@@ -27,6 +27,11 @@ export default ({ user, data }) => {
     const [listening, setListening] = useState(false);
     const [list, setList] = useState([]);
     const [users, setUsers] = useState([]);
+    
+    const [showWallpaperInput, setShowWallpaperInput] = useState(false);
+    const [tempWallpaperUrl, setTempWallpaperUrl] = useState('');
+    const [wallpaperUrl, setWallpaperUrl] = useState('');
+
 
     useEffect(() => {
 
@@ -83,6 +88,31 @@ export default ({ user, data }) => {
         }
 
     }
+
+    const handleAddPhotoClick = () => {
+        setTempWallpaperUrl(wallpaperUrl);
+        setShowWallpaperInput(true);
+    };
+    
+    const handleSetWallpaper = () => {
+        if (tempWallpaperUrl.trim() === '') {
+            setWallpaperUrl('');
+        } else{
+            try{
+                new URL(tempWallpaperUrl);
+                setWallpaperUrl(tempWallpaperUrl);
+            } catch (error) {
+                alert('URL inválida. Por favor, insira uma URL válida.');
+                return;
+        }
+    }
+        setShowWallpaperInput(false);
+    };
+    
+    const handleCloseWallpaperInput = () => {
+        setShowWallpaperInput(false);
+    };
+
     return (
         <div className="chatWindow">
             <div className="chatWindow--header">
@@ -92,8 +122,26 @@ export default ({ user, data }) => {
                     <div className="chatWindow--name">{data.title}</div>
                 </div>
 
+                <div className="chatWindow--headerbuttons"> 
+                    
+                    <div className="chatWindow--btn" onclick={handleAddPhotoClick}> 
+                        <AddPhotoAlternateIcon style={{color: '#919191'}} />
+                    </div>
+
+                </div>
+
+
+
             </div>
-            <div ref={body} className="chatWindow--body">
+            <div
+                ref={body}
+                className="chatWindow--body"    
+                style={{
+                    backgroundImage: wallpaperUrl ? `url(${wallpaperUrl})` : 'none',
+                    backgroundSize: wallpaperUrl ? 'cover' : 'auto',
+                    backgroundPosition: wallpaperUrl ? 'center' : 'initial',
+                    backgroundRepeat: wallpaperUrl ? 'no-repeat' : 'repeat'
+                }}>
                 {list.map((item, key) => (
                     <MessageItem
                         key={key}
@@ -102,6 +150,27 @@ export default ({ user, data }) => {
                     />
                 ))}
             </div>
+
+                {showWallpaperInput && (
+                <div className="chatWindow--wallpaperInputArea">
+                    <input
+                        type="text"
+                        placeholder="Cole a URL da imagem ou deixe em branco para remover"
+                        value={tempWallpaperUrl}
+                        onChange={(e) => setTempWallpaperUrl(e.target.value)}
+                        onKeyPress={(e) => e.key === 'Enter' && handleSetWallpaper()}
+                    />
+                    <div className="chatWindow--wallpaperButtons">
+                        <button onClick={handleSetWallpaper}>OK</button>
+                        <button onClick={handleCloseWallpaperInput}>Cancelar</button>
+                        {wallpaperUrl && 
+                            <button onClick={() => { setWallpaperUrl(''); setTempWallpaperUrl(''); setShowWallpaperInput(false); }}>
+                                Remover Atual
+                            </button>
+                        }
+                    </div>
+                </div>
+            )}
 
             <div className="chatWindow--emojiarea"
                 style={{ height: emojiOpen ? '200px' : '0px' }}>
