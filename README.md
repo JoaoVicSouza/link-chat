@@ -1,4 +1,4 @@
-#Link-chat
+# Link-chat
 
 ## Contextualização
 - Essa aplicação foi feita durante o estágio na empresa Central do Micro. Foi me passado a tarefa de fazer um chat interno tanto para
